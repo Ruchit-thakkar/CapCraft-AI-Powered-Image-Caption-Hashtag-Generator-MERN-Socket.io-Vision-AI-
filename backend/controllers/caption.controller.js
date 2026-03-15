@@ -54,7 +54,8 @@ data:image/jpeg;base64,${base64Image}
 `;
 
     const stream = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+
       messages: [
         {
           role: "system",
@@ -63,37 +64,40 @@ You are an elite AI image caption generator similar to ChatGPT and Gemini.
 
 Your job is to analyze an uploaded image and generate a high-quality Instagram caption.
 
-Follow these rules strictly:
+Rules:
+- Identify the main subject first.
+- If it looks like a known anime character or celebrity mention the name.
+- Briefly describe the environment or mood.
+- Focus mainly on the main subject.
+- Make the caption social-media friendly.
 
-1. First identify the main subject of the image (person, anime character, object, etc.).
-2. If the subject looks like a known anime character, celebrity, or fictional character, mention the name naturally.
-3. If the identity is unknown, describe the person instead of guessing.
-4. Also briefly describe the environment, background, or mood.
-5. Focus mainly on the main subject if it dominates the image.
-6. Do not invent unrealistic stories.
-7. Write in a natural human tone suitable for social media.
-8. The first line must grab attention.
-9. Keep the caption engaging and modern.
-
-Output format must be exactly:
+Output format:
 
 Caption:
-<instagram caption>
+<caption>
 
 Hashtags:
 #tag1 #tag2 #tag3 #tag4 #tag5
-
-Rules for hashtags:
-- exactly 5 hashtags
-- all lowercase
-- relevant to the image
 `,
         },
+
         {
           role: "user",
-          content: prompt,
+          content: [
+            {
+              type: "text",
+              text: "Analyze this image and generate an Instagram caption.",
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Image}`,
+              },
+            },
+          ],
         },
       ],
+
       stream: true,
     });
 
