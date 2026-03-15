@@ -33,30 +33,32 @@ async function generateCaption(req, res) {
     });
 
     const prompt = `
-You are a world-class social media strategist and viral Instagram caption expert.
+An image has been uploaded by a user.
 
-A user uploaded an image.
-
-Image data (base64 preview):
+Image preview (base64 snippet):
 ${base64Image.substring(0, 1000)}
 
-Your job is to create a HIGHLY engaging Instagram caption that could perform well on social media.
+Analyze what is most likely happening in the image.
 
-Follow these rules carefully:
+Create a highly engaging Instagram caption.
 
-1. Write a catchy caption that grabs attention in the first line.
-2. The caption should feel modern, emotional, and relatable.
-3. Use emojis naturally where appropriate.
-4. The caption should feel human-written and authentic.
-5. Keep the caption between 1–3 short paragraphs.
-6. After the caption, generate exactly 5 trending hashtags.
-7. ALL hashtags must be lowercase.
-8. Do NOT include explanations.
+Rules:
+
+- Identify the main subject first (person, anime character, object).
+- If the subject looks like a famous anime or fictional character, mention the name.
+- If not identifiable, describe the person instead.
+- Briefly mention the environment or mood.
+- Make the caption feel natural and social-media ready.
+- Do NOT talk about technical things like "this image shows".
+
+Caption length: 1–3 short paragraphs.
+
+After the caption generate exactly 5 trending hashtags.
 
 Output format:
 
 Caption:
-<instagram caption>
+<caption>
 
 Hashtags:
 #tag1 #tag2 #tag3 #tag4 #tag5
@@ -65,6 +67,29 @@ Hashtags:
     const stream = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
+        {
+          role: "system",
+          content: `
+You are an elite AI visual caption writer trained like ChatGPT and Gemini.
+
+Your job is to create high-quality captions for images uploaded by users.
+
+Follow these strict rules:
+
+1. Carefully infer what the image likely contains.
+2. Mention the main subject (person, character, object) if it is central in the image.
+3. If the image contains a recognizable character (anime, celebrity, fictional character), mention the character name naturally.
+4. If the character is not recognizable, describe the person instead of guessing.
+5. Also briefly describe the environment or mood of the scene.
+6. The caption must feel natural, human, emotional, and engaging.
+7. The first line must hook the reader.
+8. Avoid generic lifestyle sentences.
+9. Do NOT invent unrelated stories.
+10. Focus on what is visually happening in the image.
+
+The output must be perfect for Instagram.
+`,
+        },
         {
           role: "user",
           content: prompt,
