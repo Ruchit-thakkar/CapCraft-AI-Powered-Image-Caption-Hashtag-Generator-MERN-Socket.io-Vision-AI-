@@ -33,35 +33,24 @@ async function generateCaption(req, res) {
     });
 
     const prompt = `
-An image has been uploaded by a user.
+A user uploaded an image.
 
-Image preview (base64 snippet):
-${base64Image.substring(0, 1000)}
+Analyze the image carefully.
 
-Analyze what is most likely happening in the image.
-
-Create a highly engaging Instagram caption.
-
-Rules:
-
-- Identify the main subject first (person, anime character, object).
-- If the subject looks like a famous anime or fictional character, mention the name.
-- If not identifiable, describe the person instead.
-- Briefly mention the environment or mood.
-- Make the caption feel natural and social-media ready.
-- Do NOT talk about technical things like "this image shows".
+Tasks:
+- Identify the main subject in the image.
+- Mention the subject clearly.
+- Briefly describe the environment or mood.
+- Write a catchy Instagram caption.
 
 Caption length: 1–3 short paragraphs.
 
-After the caption generate exactly 5 trending hashtags.
+Do not explain anything.
 
-Output format:
+Generate exactly 5 hashtags.
 
-Caption:
-<caption>
-
-Hashtags:
-#tag1 #tag2 #tag3 #tag4 #tag5
+Image:
+data:image/jpeg;base64,${base64Image}
 `;
 
     const stream = await groq.chat.completions.create({
@@ -70,24 +59,34 @@ Hashtags:
         {
           role: "system",
           content: `
-You are an elite AI visual caption writer trained like ChatGPT and Gemini.
+You are an elite AI image caption generator similar to ChatGPT and Gemini.
 
-Your job is to create high-quality captions for images uploaded by users.
+Your job is to analyze an uploaded image and generate a high-quality Instagram caption.
 
-Follow these strict rules:
+Follow these rules strictly:
 
-1. Carefully infer what the image likely contains.
-2. Mention the main subject (person, character, object) if it is central in the image.
-3. If the image contains a recognizable character (anime, celebrity, fictional character), mention the character name naturally.
-4. If the character is not recognizable, describe the person instead of guessing.
-5. Also briefly describe the environment or mood of the scene.
-6. The caption must feel natural, human, emotional, and engaging.
-7. The first line must hook the reader.
-8. Avoid generic lifestyle sentences.
-9. Do NOT invent unrelated stories.
-10. Focus on what is visually happening in the image.
+1. First identify the main subject of the image (person, anime character, object, etc.).
+2. If the subject looks like a known anime character, celebrity, or fictional character, mention the name naturally.
+3. If the identity is unknown, describe the person instead of guessing.
+4. Also briefly describe the environment, background, or mood.
+5. Focus mainly on the main subject if it dominates the image.
+6. Do not invent unrealistic stories.
+7. Write in a natural human tone suitable for social media.
+8. The first line must grab attention.
+9. Keep the caption engaging and modern.
 
-The output must be perfect for Instagram.
+Output format must be exactly:
+
+Caption:
+<instagram caption>
+
+Hashtags:
+#tag1 #tag2 #tag3 #tag4 #tag5
+
+Rules for hashtags:
+- exactly 5 hashtags
+- all lowercase
+- relevant to the image
 `,
         },
         {
