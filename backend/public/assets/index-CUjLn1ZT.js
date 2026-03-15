@@ -17558,7 +17558,10 @@ const {
     getAdapter: ME,
     mergeConfig: UE,
   } = Fe,
-  Ea = Fe.create({ baseURL: "http://localhost:5000", withCredentials: !0 }),
+  Ea = Fe.create({
+    baseURL: "https://capcraft.onrender.com",
+    withCredentials: !0,
+  }),
   by = N.createContext(),
   ml = () => N.useContext(by),
   p2 = ({ children: i }) => {
@@ -21215,7 +21218,7 @@ const hE = () => {
       [x, B] = N.useState(!1),
       F = N.useRef(null);
     N.useEffect(() => {
-      const P = "http://localhost:5000";
+      const P = "https://capcraft.onrender.com";
       return (
         (F.current = ls(P)),
         F.current.on("connect", () => {
