@@ -23,7 +23,7 @@ const app = express();
 const server = http.createServer(app);
 
 // 🟢 Frontend URL (ध्यान दें: Vite का default port 5173 होता है, तो अगर आपका frontend 5173 पर है तो .env में FRONTEND_URL=http://localhost:5173 डालें)
-const frontendUrl = process.env.FRONTEND_URL || "https://capcraft.onrender.com";
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
 // Socket.io Setup
 const io = new Server(server, {

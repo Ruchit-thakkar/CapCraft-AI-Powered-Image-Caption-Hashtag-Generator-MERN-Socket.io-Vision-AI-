@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://capcraft.onrender.com",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
   withCredentials: true, // 👈 यह cookies भेजने के लिए ज़रूरी है
 });
 

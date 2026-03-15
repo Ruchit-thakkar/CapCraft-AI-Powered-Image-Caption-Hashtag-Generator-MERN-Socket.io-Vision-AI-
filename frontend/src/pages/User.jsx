@@ -25,8 +25,7 @@ const User = () => {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    const backendUrl =
-      import.meta.env.VITE_API_URL || "https://capcraft.onrender.com";
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
     socketRef.current = io(backendUrl);
 
     socketRef.current.on("connect", () => {
