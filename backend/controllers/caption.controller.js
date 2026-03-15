@@ -25,6 +25,7 @@ async function generateCaption(req, res) {
 
     const io = req.app.get("io");
 
+    // convert image to base64
     const base64Image = req.file.buffer.toString("base64");
 
     res.json({
@@ -32,29 +33,9 @@ async function generateCaption(req, res) {
       message: "AI processing started",
     });
 
-    const prompt = `
-A user uploaded an image.
-
-Analyze the image carefully.
-
-Tasks:
-- Identify the main subject in the image.
-- Mention the subject clearly.
-- Briefly describe the environment or mood.
-- Write a catchy Instagram caption.
-
-Caption length: 1–3 short paragraphs.
-
-Do not explain anything.
-
-Generate exactly 5 hashtags.
-
-Image:
-data:image/jpeg;base64,${base64Image}
-`;
-
     const stream = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+
       messages: [
         {
           role: "system",
@@ -63,19 +44,17 @@ You are an elite AI image caption generator similar to ChatGPT and Gemini.
 
 Your job is to analyze an uploaded image and generate a high-quality Instagram caption.
 
-Follow these rules strictly:
+Rules:
 
-1. First identify the main subject of the image (person, anime character, object, etc.).
-2. If the subject looks like a known anime character, celebrity, or fictional character, mention the name naturally.
-3. If the identity is unknown, describe the person instead of guessing.
-4. Also briefly describe the environment, background, or mood.
-5. Focus mainly on the main subject if it dominates the image.
-6. Do not invent unrealistic stories.
-7. Write in a natural human tone suitable for social media.
-8. The first line must grab attention.
-9. Keep the caption engaging and modern.
+1. Identify the main subject in the image.
+2. If it looks like a famous anime character, celebrity, or fictional character mention the name.
+3. If identity is unknown describe the person instead of guessing.
+4. Briefly mention the environment or mood.
+5. Focus mainly on the main subject.
+6. Make the caption engaging and social-media friendly.
+7. The first line should grab attention.
 
-Output format must be exactly:
+Output format exactly:
 
 Caption:
 <instagram caption>
@@ -89,11 +68,24 @@ Rules for hashtags:
 - relevant to the image
 `,
         },
+
         {
           role: "user",
-          content: prompt,
+          content: [
+            {
+              type: "text",
+              text: "Analyze this image and generate an Instagram caption.",
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Image}`,
+              },
+            },
+          ],
         },
       ],
+
       stream: true,
     });
 
@@ -109,7 +101,7 @@ Rules for hashtags:
       }
     }
 
-    // ✅ increment caption count
+    // increment caption count
     await userModel.findByIdAndUpdate(req.user._id, {
       $inc: { captionCount: 1 },
     });
