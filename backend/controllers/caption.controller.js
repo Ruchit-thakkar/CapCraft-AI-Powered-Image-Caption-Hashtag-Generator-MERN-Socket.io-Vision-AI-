@@ -1,5 +1,6 @@
 const Groq = require("groq-sdk");
 const userModel = require("../models/user.model");
+const sharp = require("sharp");
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -7,6 +8,7 @@ const groq = new Groq({
 
 async function generateCaption(req, res) {
   try {
+    // 1️⃣ check image
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -25,14 +27,25 @@ async function generateCaption(req, res) {
 
     const io = req.app.get("io");
 
-    // convert image to base64
-    const base64Image = req.file.buffer.toString("base64");
+    // 2️⃣ resize image using sharp
+    const processedImage = await sharp(req.file.buffer)
+      .resize({
+        width: 1024,
+        height: 1024,
+        fit: "inside",
+      })
+      .jpeg({ quality: 80 })
+      .toBuffer();
 
+    const base64Image = processedImage.toString("base64");
+
+    // respond immediately
     res.json({
       success: true,
       message: "AI processing started",
     });
 
+    // 3️⃣ AI request
     const stream = await groq.chat.completions.create({
       model: "meta-llama/llama-4-maverick-17b-128e-instruct",
 
@@ -68,7 +81,6 @@ Rules for hashtags:
 - relevant to the image
 `,
         },
-
         {
           role: "user",
           content: [
@@ -91,6 +103,7 @@ Rules for hashtags:
 
     let fullCaption = "";
 
+    // 4️⃣ streaming response
     for await (const chunk of stream) {
       const text = chunk.choices?.[0]?.delta?.content || "";
 
@@ -101,11 +114,12 @@ Rules for hashtags:
       }
     }
 
-    // increment caption count
+    // 5️⃣ increment caption usage
     await userModel.findByIdAndUpdate(req.user._id, {
       $inc: { captionCount: 1 },
     });
 
+    // 6️⃣ send final caption
     io.to(socketId).emit("captionComplete", {
       success: true,
       fullText: fullCaption,
